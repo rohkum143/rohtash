@@ -1,11 +1,18 @@
-node ('master') {
-    stage('Example') {
-        try {
-            sh 'exit 1'
-        }
-        catch (exc) {
-            echo 'Something failed, I should sound the klaxons!'
-            
-        }
-    }
-}
+node {
+   def mvnHome
+   stage('Preparation') {
+      git 'https://github.com/jenkinsci/jenkins.git'
+      mvnHome = tool 'M2_HOME'
+   }
+   stage('Build') {
+      if (isUnix()) {
+         sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore clean package"
+      } else {
+         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean package/)
+      }
+   }
+   stage('Results') {
+      junit '**/target/surefire-reports/TEST-*.xml'
+      archive 'target/*.jar'
+   }
+} 
