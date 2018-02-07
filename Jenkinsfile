@@ -1,4 +1,4 @@
-node {
+node ('master') {
     stage('Example') {
         try {
             sh 'exit 1'
